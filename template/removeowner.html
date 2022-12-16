@@ -1,0 +1,88 @@
+<html>
+
+<head>
+    <link href="/static/removeow.css"" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Ownership</title>
+</head>
+
+<body>
+    <div class="main">
+        <img class="secondcontainer" src="../static/secondpage.png" alt="">
+        <img class="textboxlabel" src="../static/Scan Or Enter Product Id.png" alt="Scan Or Enter Product Id">
+        <input class="productidtextbox" id="productid" type="text">
+        <button class="VerifyOwnershipbutton" onclick="getownerdata()">Verify Ownership</button>
+        <button class="DeleteOwnershipbutton" id="DeleteOwnershipbuttonid" onclick="confirmation()">Delete
+            Ownership</button>
+    </div>
+    <p class="ownersdetail" id="ownerdetailsid"> </p>
+
+
+    <script>
+        var getownerdetailsresponse;
+        var apiphynart = '65.0.129.168:8443';
+
+
+
+        function getownerdata() {
+            var productId = document.getElementById("productid").value;
+            let getownerdetails = new XMLHttpRequest();
+            getownerdetails.open("POST", "https://"+apiphynart+"/registration/myDevices/validate/ownership");
+            getownerdetails.setRequestHeader("Accept", "application/json");
+            getownerdetails.setRequestHeader("Content-Type", "application/json");
+            getownerdetails.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem("id_token"));
+            getownerdetails.onload = () => console.log(getownerdetails.responseText);
+            let data = JSON.stringify({
+                "productId": productId
+            })
+            console.log(data);
+            console.log(getownerdetails.status);
+            getownerdetails.send(data);
+            getownerdetails.onload = () => {
+                getownerdetailsresponse = JSON.parse(getownerdetails.response)
+                console.log(getownerdetailsresponse)
+                document.getElementById("ownerdetailsid").textContent = JSON.stringify(getownerdetailsresponse,null,2);
+
+                if (getownerdetailsresponse.status == 'success') {
+                    var DeleteOwnershipbutton = document.getElementById("DeleteOwnershipbuttonid")
+                    function showbutton() {
+                        DeleteOwnershipbutton.classList.add('open-DeleteOwnershipbutton')
+                    }
+                    showbutton()
+                }
+
+            }
+        }
+
+        var removeownershipresponse;
+        function confirmation() {
+            if (confirm('Delete Ownership\nDo you really want to delete ownership?') == true) {
+                var productId = document.getElementById("productid").value;
+                let removeownership = new XMLHttpRequest();
+                removeownership.open("Delete", "https://"+apiphynart+"/registration/myDevices/" + productId + "/removeOwnership");
+                removeownership.setRequestHeader("Accept", "application/json");
+                removeownership.setRequestHeader("Content-Type", "application/json");
+                removeownership.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem("id_token"))
+                removeownership.onload = () => console.log(removeownership.responseText);
+                removeownership.send(null);
+                removeownership.onload = () => {
+                    removeownershipresponse = JSON.parse(removeownership.response)
+                    console.log(removeownershipresponse.status)
+                    if (removeownershipresponse.status == 'success') {
+                        alert("Successfully Deleted Ownership")
+                    } else {
+                        alert("Failed to Delete Ownership")
+                    }
+                }
+            }
+            else {
+                console.log('canxel pressed')
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
+
